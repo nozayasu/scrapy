@@ -5,7 +5,7 @@ import six
 from scrapy.spiders import Spider
 from scrapy.http import Request, XmlResponse
 from scrapy.utils.sitemap import Sitemap, sitemap_urls_from_robots
-from scrapy.utils.gz import gunzip, is_gzipped
+from scrapy.utils.gz import gunzip, is_gzipped, has_gzip_magic_number
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +58,8 @@ class SitemapSpider(Spider):
         or None if the response is not a sitemap.
         """
         if isinstance(response, XmlResponse):
+            if has_gzip_magic_number(response):
+                return gunzip(response.body)
             return response.body
         elif is_gzipped(response):
             return gunzip(response.body)
